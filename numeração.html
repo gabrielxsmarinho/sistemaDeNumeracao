@@ -1,0 +1,310 @@
+<meta charset="utf-8">
+<script>
+	function formar_grupos(array_inicial,nporgrupo,comeco){
+	var tamanho = Math.ceil(array_inicial.length/nporgrupo);
+	var vetor_final=new Array(tamanho);
+	for(var i=0;i<tamanho;i++){
+		vetor_final[i]=new Array(nporgrupo);
+		var soma="";
+		for(var j=0;j<nporgrupo;j++){
+			if(j+nporgrupo*i+comeco>=array_inicial.length){
+				array_inicial[j+nporgrupo*i+comeco]="";
+			}
+			soma=soma+array_inicial[j+nporgrupo*i+comeco];
+		}
+		vetor_final[i]=soma;
+	}
+    var soma2="";
+            for(var j=0;j<comeco;j++){
+            soma2=soma2+array_inicial[j];    
+            }
+            if(soma2==""){
+                soma2=undefined;
+            }
+        var v=[soma2,vetor_final];
+	return v;
+}
+	function zeros(numero,precisao){//Numero é uma string
+		numero=String(numero);
+		var zeros="";
+		var teste=0;
+		for(var i=0;i<numero.length;i++){
+			if(numero[i]=="."){
+				teste=1;
+				break;
+			}
+		}
+		if(teste==0){
+			numero=numero+".";
+		}
+		for(var a=0;a<precisao;a++){
+			zeros=zeros+"0";
+		}
+		if(isNaN(numero)==false){
+			numero=numero+zeros;
+		}
+		var cont=0;
+		var j=0;
+		var [inteiro,decimal]=numero.split(".");
+		if(isNaN(numero)==false){
+		for(var i=0;i<decimal.length;i++){
+			if(decimal[i]==0){
+				cont++;
+			}else{
+				j=i;
+				cont=0;
+			}
+			if(cont==precisao){
+				break;
+			}
+		}
+		numero=parseFloat(numero).toFixed(j+1);
+	}else{
+		numero=String(numero);
+		if(decimal==""){
+			numero=inteiro;
+		}else{
+			var j;
+			var num="";
+			var cont=0
+			for(var i=0;i<decimal.length-1;i++){
+				if(decimal[i]==0){
+					if(decimal[i+1]==0){
+					cont++;	
+					}else{
+						num=num+decimal[i];
+					}
+				}else{
+					cont=0;
+					num=num+decimal[i];
+				}
+				if(cont==precisao){
+					numero=inteiro+"."+num;
+					break;
+				}
+			}
+		}
+	}
+		return numero;
+	}
+function dizima_periodica(numero,precisao){//numero é uma String de um número com casas decimais
+	numero=String(numero);
+	var [int,dec]=numero.split(".");
+    var y;
+	var cont;
+    var periodo,intruso;
+	var numerador,denominador;
+	var periodo_final;
+    var intruso_final;
+    var maior;
+    //Achando o Período
+    for(var i=0;i<dec.length;i++){//Qtd por grupo-1
+            for(var j=0;j<dec.length;j++){//j=Onde começa o agrupamento
+                var tamanho=Math.ceil((dec.length-j)/(i+1));
+                var teste=0;
+                var aux = new Array(dec.length);
+                aux[i]= new Array(dec.length-j);
+                aux[i][j]=formar_grupos(dec,i+1,j)[1];
+                cont=new Array(dec.length);
+                cont[i]=new Array(dec.length);
+                cont[i][j]=0;
+                for(var k=0;k<tamanho-1;k++){
+                    if(i==0 && j==0 && k==0){
+                        y=aux[i][j][k];
+                        maior=cont[i][j];
+                        }
+                    if(aux[i][j][k]==aux[i][j][k+1] && typeof aux[i][j][k]=="string"){
+                        cont[i][j]++;
+                            if(cont[i][j]>maior){
+                                i_final=i;
+                                j_final=j;
+                                y=aux[i][j][k];
+                                maior=cont[i][j];
+                            }
+                        }else{
+                            cont[i][j]=0;
+                        }
+                    }
+                }
+
+            }
+            if(maior<3 || y==0){
+                return numero;
+            }else{
+            	intruso_final=dec.split(y)[0];
+                periodo_final=y;
+                var num_final;
+            	if(periodo_final!=undefined){
+                	num_final=String(int)+"."+String(intruso_final)+"("+periodo_final+")";
+            	}
+                else{
+                	num_final=String(int)+"."+String(intruso_final);
+                }
+                return num_final;
+            }
+}   
+	function converter(n,baseinicial,base,precisao){
+	var letras="ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+	//Digitar Número
+	//Contar digitos
+	for(var a=0;a<n.length;a++){
+		if(n[a]=="."){
+			break;
+		}
+	}
+	var digitos_apos = n.length-a-1;
+	//Parte Inteira
+	//Testar Validade do Número
+	var teste=1;
+	for(var i=0;i<n.length;i++){
+		if(isNaN(n[i])==true){
+			if(n[i]=="."){
+				continue;
+			}
+			for(var j=0;j<letras.length;j++){
+				if(letras[j]==n[i]){
+					break;
+				}
+			}
+			if(10+j>=baseinicial){
+				teste=0;
+				break;
+			} 
+		}else if(n[i]>=baseinicial && n[i]!="."){
+			teste=0;
+		}
+	}
+	if(teste==1){
+		//Convertendo para decimal
+		var num,fracionariatemp;
+		if(digitos_apos>0){
+			[num,fracionariatemp]=n.split(".");
+		}else{
+			num=String(n);
+			fracionariatemp="";
+		}
+		var N=0;
+		//Parte Inteira
+		for(var i=1;i<=num.length;i++){
+			if(isNaN(num[num.length-i])==true){
+				for(var j=0;j<letras.length;j++){
+					if(letras[j]==num[num.length-i]){
+						break;
+					}
+				}
+				//String
+				N=N+parseInt(10+j)*Math.pow(baseinicial,i-1);
+				continue;
+			}
+			//Número
+			N=N+parseInt(num[num.length-i])*Math.pow(baseinicial,i-1);
+		}
+		//Parte Fracionária
+		var fracdecimal=0;
+		for(var i=0;i<fracionariatemp.length;i++){
+				if(isNaN(fracionariatemp[i])==false){
+				fracdecimal=fracdecimal+parseInt(fracionariatemp[i])*Math.pow(baseinicial,-1-i);
+			}else{
+				for(var j=0;j<letras.length;j++){
+					if(letras[j]==fracionariatemp[i]){
+						break;
+					}
+				}
+			fracdecimal=fracdecimal+parseFloat(10+j)*Math.pow(baseinicial,-1-i);
+			}
+		}
+		N=N+fracdecimal;
+		N = zeros(N,precisao);
+		var fracionaria = parseFloat(N)-parseInt(N);
+		var Nfloat=N;
+		N=parseInt(N);
+		//Convertendo para base informada
+		var final="";
+			if(base>10 && base<36){
+				var resto;
+				for(var i=0;Nfloat>0;i++){
+					Nfloat=parseInt(Nfloat);
+					resto=Nfloat%base;
+					if(Nfloat>=10 && Nfloat<base){
+						resto=letras[Nfloat-10];
+						final=resto+final;
+						break;
+					}
+					if(resto>=10){
+						resto=letras[resto-10];
+					}
+					final=resto+final;
+					Nfloat=parseInt(Nfloat/base);
+				}
+			}else if(base>0 && base<=10){
+				var resto;
+				for(var i=0;Nfloat>0;i++){
+					Nfloat=parseInt(Nfloat);
+					resto=Nfloat%base;
+					final=resto+final;
+					Nfloat=parseInt(Nfloat/base);
+				}
+				/*if(base==2){
+					for(var j=0;j>=0;j++){
+						if(i%4==0){
+							break;
+						}else{
+							final="0"+final;
+							i++;
+						}
+					}
+				}*/
+			}else{
+				document.write("Erro");
+			}
+			//Parte Fracionária
+			var literal="";
+			for(var i=0;i>=0;i++){
+				if(parseInt(base*fracionaria)>=10){
+					for(var j=0;j<letras.length;j++){
+						if(10+j==parseInt(base*fracionaria)){
+							break;
+						}
+					}
+					var x=letras[j];
+					literal=literal+x;
+				}else{
+				literal=literal+(parseInt(base*fracionaria)).toString();
+				}
+				var sobra=parseFloat(base*fracionaria)-parseInt(base*fracionaria);
+				if(zeros(sobra,precisao)==0){
+					break;
+				}
+				fracionaria=sobra;
+			}
+			/*if(base==2){
+				for(var j=1;(literal.length)%4!=0;j++){
+						literal=literal+"0";
+					}
+				}*/
+			if(literal==0){
+			}else{
+				final=final+"."+literal;
+			}
+	}else{
+		document.write("Erro");
+	}
+	if(isNaN(final)==false && parseFloat(final)>parseInt(final)){
+		final=dizima_periodica(final,precisao);
+	}
+	zeros(final,precisao);
+	return final;
+	}
+
+	//Principal
+	//Entrada 
+	var dado_inicial=prompt("Digite um número(pode conter caracteres):");
+	var baseinicial=parseInt(prompt("Digite o valor da base desse número:"));
+	var basefinal=parseInt(prompt("Digite o valor da base final após a conversão:"));
+	var precisao = prompt("Defina a precisao de cálculo:");
+	//Saída
+	var dado_final=converter(dado_inicial,baseinicial,basefinal,precisao);
+	var [int_inicial,dec_inicial]=dado_inicial.split(".");
+	document.write("("+dado_inicial+")"+"<sub>"+baseinicial+"</sub> = ");
+	document.write("("+dado_final+")"+"<sub>"+basefinal+"</sub>");
+</script>
